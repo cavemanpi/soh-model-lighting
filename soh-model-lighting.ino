@@ -39,19 +39,12 @@ void loop() {
 }
 
 void handle_house_lights(HouseLightSettings *house_lights) {
-  unsigned long now = millis();
+ unsigned long now = millis();
 
-  // Note: When I added a pnp transistor to the schematic, the 
-  // logic of the analog write flipped on me. So 255 is now off.   
-  int pin_on = 55;
-  int pin_off = 255;
-  
   // The inteded purpose is to have lights inside the opera house model
-  // blink prior to playing music kind of like what they do at lobbies of
-  // concert halls and such to indicate people should take their seats.
+  // blink prior to playing music kind of like what they do lobbies of
+  // concert hall and such to indicate people should take their seats.
   if (house_lights->blink) {
-
-
     
     // If we are ending our last loop, reset counter and turn lights lights will
     // turn on or off appropriately on the next main loop.
@@ -70,23 +63,23 @@ void handle_house_lights(HouseLightSettings *house_lights) {
         house_lights->current_loop++;
         difference = 0;
       }
-      
+
+      long analog_value;
       // Fade out faster than we fade in, but when we fade back in,
       // remain illumitated for a bit longer than dark (controlled by if condition above)
-      long analog_value;
       if(difference < 300) {
-        analog_value = 55 + difference;
-        if (analog_value > pin_off) {
-          analog_value = pin_off;
+        analog_value = 150 - difference/2;
+        if (analog_value < 0) {
+          analog_value = 0;
         }
       }
-      else if (difference >= 300 && difference < 500) {
-        analog_value = pin_off;
+      else if (difference >= 300 && difference < 600) {
+        analog_value = 0;
       }
       else {
-        analog_value = pin_off - (difference - 500)*.1;
-        if (analog_value < pin_on) {
-          analog_value = pin_on;
+        analog_value = (difference - 600)/5;
+        if (analog_value > 150) {
+          analog_value = 150;
         }
       }
   
@@ -96,10 +89,10 @@ void handle_house_lights(HouseLightSettings *house_lights) {
   else {
     // We're not blinking, so should we be on or off?
     if (house_lights->on) {
-      analogWrite(house_lights->pin, pin_on);
+      analogWrite(house_lights->pin, 150);
     }
     else {
-      analogWrite(house_lights->pin, pin_off);
+      analogWrite(house_lights->pin, 0);
     }
   }
 }
